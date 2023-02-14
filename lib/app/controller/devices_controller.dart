@@ -5,7 +5,6 @@ import 'package:adb_tool/utils/plugin_util.dart';
 import 'package:adb_tool/utils/so_util.dart';
 import 'package:adbutil/adbutil.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:global_repository/global_repository.dart';
 
@@ -13,13 +12,21 @@ import 'history_controller.dart';
 
 class DevicesEntity {
   DevicesEntity(this.serial, this.stat);
+
   static String modelGetKey = 'ro.product.model';
+
   // 有可能是ip或者设备序列号
   final String serial;
+
   // ro.product.model
   String productModel;
+
   // 连接的状态
   String stat;
+
+  // 是否设置了最大幻影进程
+  bool isMaxPhantom = false;
+
   @override
   bool operator ==(dynamic other) {
     // 判断是否是非
@@ -34,11 +41,13 @@ class DevicesEntity {
   }
 
   bool get isConnect => _isConnect();
+
   bool _isConnect() {
     return stat == 'device' || stat == 'OTG';
   }
 
   bool get isOTG => _isOTG();
+
   bool _isOTG() {
     return stat == 'OTG';
   }
@@ -89,6 +98,7 @@ class DevicesController extends GetxController {
   List<DevicesEntity> otgDevices = [];
 
   bool getRoot = false;
+
   // adb是否在启动中
   bool adbIsStarting = true;
   List<DevicesEntity> devicesEntitys = [];
@@ -134,6 +144,7 @@ class DevicesController extends GetxController {
 
   // 这是model的缓存
   Map<String, String> modelCache = {};
+
   Future<void> handleResult(String data) async {
     letADBStarted();
     // if (kReleaseMode) {
@@ -192,6 +203,7 @@ class DevicesController extends GetxController {
   }
 
   Completer<bool> removeLock;
+
   Future<void> updateWithAnima(List<DevicesEntity> current) async {
     // Log.d('updateWithAnima ->$current');
     for (final DevicesEntity devicesEntity in current) {
@@ -263,6 +275,7 @@ class DevicesController extends GetxController {
         ),
       );
     }
+    setMaxPhantom(devicesEntity);
   }
 
   DevicesEntity getDevicesByIp(String ip) {
@@ -272,5 +285,29 @@ class DevicesController extends GetxController {
       }
     }
     return null;
+  }
+
+  void setMaxPhantom(DevicesEntity entity) async {
+    final String currPhantom = await execCmd(
+      "adb -s ${entity.serial} shell /system/bin/dumpsys activity settings | findstr max_phantom_processes",
+    );
+    Log.w("currPhantom=$currPhantom");
+    final String setMaxResult = await execCmd(
+      "adb -s ${entity.serial} shell /system/bin/device_config put activity_manager max_phantom_processes 2147483647",
+    );
+    Log.w("setMaxResult=$setMaxResult");
+    final String setPersistent = await execCmd(
+      "adb -s ${entity.serial} shell /system/bin/device_config set_sync_disabled_for_tests persistent",
+    );
+    Log.w("setPersistent=$setPersistent");
+    final String afterPhantom = await execCmd(
+      "adb -s ${entity.serial} shell /system/bin/dumpsys activity settings | findstr max_phantom_processes",
+    );
+    Log.w("afterPhantom=$afterPhantom");
+    if (afterPhantom == "max_phantom_processes=2147483647") {
+      entity.isMaxPhantom = true;
+    } else {
+      entity.isMaxPhantom = false;
+    }
   }
 }

@@ -13,6 +13,7 @@ class DevicesItem extends StatefulWidget {
     Key key,
     this.devicesEntity,
   }) : super(key: key);
+
   // 可能是ip地址可能是设备编号
   final DevicesEntity devicesEntity;
 
@@ -74,6 +75,7 @@ class _DevicesItemState extends State<DevicesItem>
   }
 
   bool check = false;
+
   @override
   void dispose() {
     animationController.dispose();
@@ -136,23 +138,50 @@ class _DevicesItemState extends State<DevicesItem>
                           SizedBox(
                             height: 2.w,
                           ),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: CandyColors.orange,
-                              borderRadius: BorderRadius.circular(4.w),
-                            ),
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 4.w,
-                              vertical: 2.w,
-                            ),
-                            child: Text(
-                              widget.devicesEntity.stat,
-                              style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white.withOpacity(0.8),
-                                fontSize: 10.w,
+                          Row(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: CandyColors.orange,
+                                  borderRadius: BorderRadius.circular(4.w),
+                                ),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 4.w,
+                                  vertical: 2.w,
+                                ),
+                                child: Text(
+                                  widget.devicesEntity.stat,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white.withOpacity(0.8),
+                                    fontSize: 10.w,
+                                  ),
+                                ),
                               ),
-                            ),
+                              SizedBox(
+                                width: 5.w,
+                              ),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: widget.devicesEntity.isMaxPhantom ? CandyColors.candyBlue : CandyColors.candyPink,
+                                  borderRadius: BorderRadius.circular(4.w),
+                                ),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 4.w,
+                                  vertical: 2.w,
+                                ),
+                                child: Text(
+                                  widget.devicesEntity.isMaxPhantom
+                                      ? 'Vmos激活成功'
+                                      : 'Vmos未激活',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white.withOpacity(0.8),
+                                    fontSize: 10.w,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),

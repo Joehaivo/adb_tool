@@ -1,0 +1,9 @@
+app_id: C99D07BB-0CAD-4795-B108-48315C052BC1
+publisher: Joehaivo
+publisher_url: https://github.com/Joehaivo/adb_tool
+display_name: adb_tool
+create_desktop_icon: true
+install_dir_name: adb_tool
+locales:
+  - en
+  - zh
